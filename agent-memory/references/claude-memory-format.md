@@ -1,30 +1,46 @@
 # Reference: Linked-Map Memory Format & Templates
 
-This reference documents the exact file conventions distilled from Claude Code's per-project memory system (`MEMORY.md` + typed `<topic-slug>.md` files), enhanced with project progress tracking ("What's Left"), dead-end tracking, and conversation links.
+This reference documents the file conventions of Claude Code's per-project memory system (`MEMORY.md` + typed `<topic-slug>.md` files), which every harness store uses unchanged so files can be copied between them, plus the project progress ("What's Left"), dead-end, and conversation-link conventions this skill adds.
+
+Required frontmatter: `name`, `description`, `metadata.type`. Optional: `metadata.modified`, `metadata.originSessionId`.
 
 ---
 
-## 1. `MEMORY.md` Index Template
+## 1. `MEMORY.md` Index Templates
 
-`MEMORY.md` is an index only. Every entry is a single Markdown bullet (`- [Title](path) — one-line hook`):
+`MEMORY.md` is an index only. Every entry is a single Markdown bullet with a link **relative to the index's own directory** (`- [Title](topic-slug.md) — one-line hook`).
+
+### Project index — `<project>/.agent/memory/MEMORY.md`
+
+Flat list, exactly like Claude Code's per-project index (and seeded from `~/.claude/projects/<slug>/memory/MEMORY.md` by `memory_ctl.py sync-claude`):
 
 ```markdown
-# Persistent Memory & Project Map (`MEMORY.md`)
+- [Mario offline sync](mario-offline-sync.md) — client ids + persisted outbox + snapshot index; invariants for updatePage and cascades
+- [Mario install procedure](mario-install-procedure.md) — pacman package from packaging/arch, bump pkgrel, then pkexec pacman -U
+- [Mario screenshot workflow](mario-screenshot-workflow.md) — GNOME blocks synthetic input; drive the app on a nested Xvfb :99
+```
 
-> Master index of projects, findings, progress, remaining work ("what's left"), and linked chat summaries. Keep entries concise (one line per link) and store detailed findings/status in the linked `.md` files.
+### Cross-project index — `~/.agent/memory/MEMORY.md`
 
-## Projects & System Status Map
+Cross-project memories only (user profile, feedback rules, shared references, chat history):
 
-- [Home Lab & Router Setup](file:///path/to/memory/home-lab-dashboard.md) — M09 root shell, Dropbear SSH, dnsmasq → AdGuard, termox panel, and LAN LLM setup
-- [Mario Note App](file:///path/to/memory/mario.md) — Apple macOS 27 UI redesign, local-first offline sync invariants, pluggable LAN AI backends, and open items
+```markdown
+# Cross-Project Memory (`MEMORY.md`)
 
-## Existing Cross-Agent Memory Maps (Read-Only Bridge)
+> Cross-project index: user profile, feedback rules, and references that apply in every project.
 
-- [Home Lab Claude Memory](file:///home/user/.claude/projects/-home-user-Projects-home-lab-dashboard/memory/MEMORY.md) — Phone SSH, test workspace, LLM preferences, termox deploy, and M09 notes
+## User & Feedback
+
+- [GUI sudo via pkexec](pkexec-for-sudo.md) — when `sudo -n` fails, run the command through `pkexec` instead of asking the user
+- [Git attribution](git-attribution.md) — never add AI co-author trailers; commit with the ~/.gitconfig identity
+
+## References
+
+- [Home LAN inference box](lan-llm-host.md) — Ollama on the LAN; model tags and context sizes
 
 ## Chat History Map
 
-- [Fix Arch Linux Pacman Lock Error](conversation://cfc7816c-c2b7-4b89-bfd3-ce809a6aee21) (2026-10-18) — Removed stale `/var/lib/pacman/db.lck` via `pkexec` and configured global memory skill
+- [Fix Arch Linux Pacman Lock Error](conversation://cfc7816c-c2b7-4b89-bfd3-ce809a6aee21) (2026-10-18) — removed stale `db.lck` via `pkexec`
 ```
 
 ---
@@ -40,7 +56,6 @@ Use `type: project` for ongoing project state, stack/buildspec overrides, non-ob
 name: <project-or-feature-slug>
 description: "<One-line summary specific enough for an agent to decide relevance from the index>"
 metadata:
-  node_type: memory
   type: project
   originSessionId: <conversation-id>
   modified: 2026-10-18T14:30:00Z
@@ -82,7 +97,6 @@ Use `type: feedback` whenever the user corrects an action ("never tag AI as co-a
 name: <rule-slug>
 description: "<Imperative one-line summary of the rule>"
 metadata:
-  node_type: memory
   type: feedback
   originSessionId: <conversation-id>
   modified: 2026-10-18T14:30:00Z
@@ -106,7 +120,6 @@ Use `type: user` for hardware setup, performance priorities, and workflow habits
 name: <preference-slug>
 description: "<One-line summary of what the user prefers in this domain>"
 metadata:
-  node_type: memory
   type: user
   originSessionId: <conversation-id>
   modified: 2026-10-18T14:30:00Z
@@ -133,7 +146,6 @@ Use `type: reference` for pointers to external resources (SSH hosts/keys, Figma 
 name: <resource-slug>
 description: "<One-line summary of the external resource and how to reach it>"
 metadata:
-  node_type: memory
   type: reference
   originSessionId: <conversation-id>
   modified: 2026-10-18T14:30:00Z
